@@ -1,4 +1,6 @@
-/* @import url('../index.css'); */
+@import url('../../components.css');
+
+
 :root {
   --bg: #FAF8F5;
   --surface: #ffffff;

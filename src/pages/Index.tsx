@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Loader from "../components/objects/Loader";
 import { Animated } from "../components/objects/Animated";
 import { logo } from "../assets/Index";
-import { Button } from "../components/objects/Button";
+// import { Button } from "../components/objects/Button";
 
 export default function Index() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,12 +29,12 @@ export default function Index() {
     }
   }, []);
 
-  const handleContinue = () => {
-    if (onboarded === false) {
-      window.api.setOnboarded(false);
-    }
-    navigate('/app/home');
-  }
+  // const handleContinue = () => {
+  //   if (onboarded === false) {
+  //     window.api.setOnboarded(false);
+  //   }
+  //   navigate('/app/home');
+  // }
 
 
   const Content1 = () => {
@@ -45,19 +45,6 @@ export default function Index() {
       </>
     );
   };
-
-  const  Content2 = () => {
-    return (
-      <div>
-        <h1>Welcome to Poster!</h1>
-        <p>Let's get you set up.</p>
-
-        <Button style={{marginTop: '10px'}} className={`rounded primary`}>
-        {onboarded ? 'Continue to App' : 'Get Started'}
-      </Button>
-      </div>
-    )
-  }
 
   const Redirect = () => {
     navigate('/onboarding');

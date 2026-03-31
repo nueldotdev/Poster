@@ -208,6 +208,15 @@ body {
   padding: 0 1rem;
 }
 
+.only-bottom-border {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+  outline: none;
+  transition: all 0.2s;
+}
+
 .loader {
   border: 8px solid #f3f3f3;
   border-top: 8px solid ;
@@ -218,8 +227,17 @@ body {
   margin: 2rem auto;
 }
 
+/* index.css */
+.toast-error {
+  border-left: 3px solid #E24B4A !important;
+}
+
+.toast-success {
+  border-left: 3px solid #3a7d44 !important;
+}
+
 .slide-up {
-  animation: slideUp 1.5s ease-out;
+  animation: slideUp 1s ease-out;
 }
 
 .delay-1s {
@@ -227,11 +245,11 @@ body {
 }
 
 .slide-up.fade-in {
-  animation: slideUp 1.5s ease-out, fadeIn 1.5s ease-out;
+  animation: slideUp 1s ease-out, fadeIn 1s ease-out;
 }
 
 .fade-in {
-  animation: fadeIn 1.5s ease-out;
+  animation: fadeIn 1s ease-out;
 }
 
 @keyframes fadeIn {

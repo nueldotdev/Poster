@@ -15,11 +15,14 @@
 }
 
 
-* {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
+
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -229,10 +232,12 @@ body {
 
 /* index.css */
 .toast-error {
+  background-color: #E24B4A;
   border-left: 3px solid #E24B4A !important;
 }
 
 .toast-success {
+  background-color: #3a7d44;
   border-left: 3px solid #3a7d44 !important;
 }
 

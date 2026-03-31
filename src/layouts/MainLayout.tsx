@@ -1,6 +1,7 @@
 import React from 'react';
 import Navigation from '../components/Navigation';
 import { Outlet } from 'react-router-dom';
+import "../styles/layout.css"
 
 // interface MainLayoutProps {
 //   children: React.ReactNode;

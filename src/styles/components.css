@@ -76,8 +76,9 @@
 
 
 .type-filled {
-  background-color: var(--accent-light);
-  color: white;
+  background-color: white;
+  color: var(--text-primary);
+  border: 2px solid var(--accent-light);
 }
 
 .type-outline {

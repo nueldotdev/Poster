@@ -4,14 +4,14 @@ import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import Index from "./pages/Index";
-import Onboarding from "./pages/Onboarding";
+import Onboarding from "./pages/onboarding/Onboarding";
 import { Toaster } from "sonner";
 
 const App = () => {
   return (
     <Router>
       <Toaster
-        position="bottom-right"
+        position="top-right"
         toastOptions={{
           style: {
             background: "#FFFFFF",

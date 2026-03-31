@@ -6,4 +6,5 @@ import { contextBridge, ipcRenderer } from "electron";
 contextBridge.exposeInMainWorld('api', {
   getOnboarded: () => ipcRenderer.invoke('get-onboarded'),
   setOnboarded: () => ipcRenderer.invoke('set-onboarded'),
+  setName: (name: string) => ipcRenderer.invoke('set-name', name)
 });

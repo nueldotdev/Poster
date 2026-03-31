@@ -10,6 +10,7 @@ import Store from "electron-store";
 const store = new Store<{ onboarded: boolean }>({
   defaults: {
     onboarded: false,
+    name: ""
   },
 });
 
@@ -52,6 +53,12 @@ ipcMain.handle("set-onboarded", async (): Promise<{ success: boolean }> => {
   store.set("onboarded", true);
   return { success: true };
 });
+
+ipcMain.handle("set-name", async (_event, name: string) => {
+  store.set("name", name);
+  const checkName = store.get("name");
+  return { success: checkName === name, name }
+})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

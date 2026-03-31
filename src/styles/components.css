@@ -1,0 +1,33 @@
+@import url('../index.css');
+:root {
+  --bg: #FAF8F5;
+  --surface: #ffffff;
+  --surface-2: #f0eee9;
+  --border: #e8e5df;
+  --text-primary: #1C1917;
+  --text-secondary: #6b6760;
+  --text-muted: #78716C;
+  --accent: #E8821A;
+  --accent-light: #C46510;
+  --accent-muted: #FDF0E0;
+  --sidebar-w: 220px;
+  --radius: 12px;
+}
+
+
+/* Button */
+button {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+button.primary {
+  background-color: var(--accent-light);
+  color: white;
+}

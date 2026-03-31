@@ -2,7 +2,7 @@ export interface ElectronAPI {
   setWallpaper: (path: string) => Promise<{ success: boolean }>
   getWallpapers: () => Promise<string[]>
   onWallpaperChanged: (cb: (path: string) => void) => void
-  setOnboarded: () => Promise<{ success: boolean }>
+  setOnboarded: (onboarded: boolean) => Promise<{ success: boolean }>
   getOnboarded: () => Promise<boolean>
 }
 

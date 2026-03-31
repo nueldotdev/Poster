@@ -1,17 +1,19 @@
 /* Global Styles */
 :root {
-  --bg: #f7f6f3;
+  --bg: #FAF8F5;
   --surface: #ffffff;
   --surface-2: #f0eee9;
   --border: #e8e5df;
-  --text-primary: #1a1916;
+  --text-primary: #1C1917;
   --text-secondary: #6b6760;
-  --text-muted: #a8a49e;
-  --accent: #c17b3f;
-  --accent-light: #f5ebe0;
+  --text-muted: #78716C;
+  --accent: #E8821A;
+  --accent-light: #C46510;
+  --accent-muted: #FDF0E0;
   --sidebar-w: 220px;
   --radius: 12px;
 }
+
 
 * {
   margin: 0;

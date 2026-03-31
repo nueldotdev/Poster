@@ -1,12 +1,15 @@
 // import { contextBridge } from 'electron';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
+  const navigate = useNavigate();
 
   const handleClick = async () => {
     const result = await window.api.getOnboarded();
-    console.log("Result: ", result);
-    return result
+    console.log("Onboarded Status: ", result);
+    
+    result === true ? navigate('/app/home') : navigate('/');
   }
 
   return (

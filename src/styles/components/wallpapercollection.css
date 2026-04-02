@@ -1,0 +1,238 @@
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-2: #f0eee9;
+  --border: #e8e5df;
+  --text-primary: #1a1916;
+  --text-secondary: #6b6760;
+  --text-muted: #a8a49e;
+  --accent: #e8821a;
+  --accent-light: #c46510;
+  --accent-muted: #fdf0e0;
+  --accent-muted-anim: #f9d6ac;
+  --sidebar-w: 220px;
+  --radius: 12px;
+}
+
+
+/* Wallpaper Collection */
+.collection {
+  height: 100%;
+  width: 100%;
+}
+
+.collection-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.collection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.collection-count {
+  background: var(--accent-muted);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* view toggle */
+
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  margin-right: 10px;
+}
+
+.view-btn {
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.view-btn.active {
+  background: var(--surface);
+}
+
+.view-btn .toggle-icon {
+  color: var(--text-muted);
+}
+
+/* add button */
+.add-btn {
+  height: 34px;
+  padding: 0 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+
+.add-btn:hover { background: var(--accent-dark); }
+
+/* empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--accent-muted);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.empty-title {
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.empty-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* gallery grid */
+.wall-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.wall-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 16/10;
+  cursor: pointer;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+}
+
+.wall-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wall-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.wall-card:hover .wall-overlay { opacity: 1; }
+
+.wall-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.wall-btn {
+  height: 28px;
+  padding: 0 14px;
+  border-radius: 20px;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s ease;
+}
+
+.wall-btn.set {
+  background: white;
+  color: var(--text);
+}
+
+.wall-btn.set:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.wall-name {
+  font-size: 12px;
+  color: white;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* list view */
+.wall-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wall-list-item {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  transition: border-color 0.15s ease;
+}
+
+.wall-list-item:hover { border-color: var(--accent); }
+
+.wall-list-thumb {
+  width: 64px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.wall-list-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.wall-list-date {
+  font-size: 11px;
+  color: var(--text-hint);
+  margin-top: 2px;
+}

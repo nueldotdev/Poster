@@ -6,6 +6,7 @@ import AboutPage from "./pages/AboutPage";
 import Index from "./pages/Index";
 import Onboarding from "./pages/onboarding/Onboarding";
 import { Toaster } from "sonner";
+import RecentsPage from "./pages/RecentsPage";
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/app" element={<MainLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="recents" element={<RecentsPage />} />
           <Route path="about" element={<AboutPage />} />
         </Route>
       </Routes>

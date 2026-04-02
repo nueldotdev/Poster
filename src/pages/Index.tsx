@@ -54,9 +54,16 @@ export default function Index() {
     );
   }
 
+  const RedirectHome = () => {
+    navigate('/app/');
+    return (
+      <></>
+    );
+  }
+
   return (
     <Animated.div className="flex flex-col items-center text-center justify-center h-screen slide-up fade-in overflow-hidden">
-      {loading ? <Content1 /> :  <Redirect />}
+      {loading ? <Content1 /> :  (onboarded ? <RedirectHome /> : <Redirect />)}
     </Animated.div>
   );
 }

@@ -38,7 +38,7 @@ export default function Onboarding() {
   return (
     <>
       <MasonryBackground />
-      <div className="flex flex-col items-center text-center justify-center h-screen slide-up fade-in overflow-hidden v-gap z-index">
+      <div className="flex flex-col items-center text-center justify-center h-screen slide-up fade-in overflow-hidden v-gap z-index w-full">
         <img src={logo} alt="Logo" />
         <h1>
           Welcome to <span className="keyword">Poster</span>

@@ -1,14 +1,7 @@
 import React from "react";
-import { Home, Clock, PlusIcon } from "lucide-react";
 import { useLocation } from "react-router-dom";
-import { Button } from "./objects/Button";
-
-
-const navItems = [
-  { name: 'Home', path: '/app/', icon: <Home size={18} className='nav-icon' /> },
-  { name: 'Recents', path: '/app/recents', icon: <Clock size={18} className='nav-icon' /> },
-  // { name: 'Settings', path: '/app/settings', icon: <Settings size={18} /> },
-];
+// import { Button } from "./objects/Button";
+import { navItems } from "../hooks/navItems";
 
 
 export const Header = () => {

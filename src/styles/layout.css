@@ -170,47 +170,51 @@
   margin-top: auto;
 }
 
-.pro-banner {
-  background: var(--text-primary);
-  border-radius: 10px;
-  padding: 14px;
-  color: white;
-}
-
-.pro-banner p {
-  font-size: 12px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 4px 0 10px;
-}
-
-.pro-btn {
+.pro-badge {
+  font-size: 8.5px;
   background: var(--accent);
   color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 7px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: "DM Sans", sans-serif;
-  cursor: pointer;
-  width: 100%;
-}
-
-.pro-title {
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.pro-title span {
-  background: var(--accent);
-  font-size: 9px;
-  padding: 2px 5px;
+  padding: 1px 6px;
   border-radius: 4px;
+  font-weight: 800;
   letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  width: fit-content;
+  margin-top: 2px;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+
+.pro-card {
+  background: var(--text-primary);
+  border-radius: 12px;
+  padding: 16px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pro-card-info h4 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.pro-card-info p {
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0.7;
+}
+
+.full-w {
+  width: 100%;
 }
 
 /* MAIN */
@@ -353,7 +357,8 @@
 .content {
   flex: 1;
   overflow: auto;
-  padding: 28px;
+  /* padding: 28px; */
+  width: 100%;
 }
 
 .content::-webkit-scrollbar {
@@ -421,6 +426,7 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 28px;
+  min-height: 84px; /* Fix height for skeleton stability */
 }
 
 .current-thumb {
@@ -484,121 +490,6 @@
   background: var(--text-primary);
   color: white;
   border-color: var(--text-primary);
-}
-
-/* MASONRY GRID */
-.masonry {
-  columns: 4;
-  column-gap: 14px;
-}
-
-.wall-card {
-  break-inside: avoid;
-  margin-bottom: 14px;
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  background: var(--surface-2);
-  group: true;
-}
-
-.wall-card img {
-  width: 100%;
-  display: block;
-  transition: transform 0.3s ease;
-}
-
-.wall-card:hover img {
-  transform: scale(1.03);
-}
-
-.wall-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 12px;
-}
-
-.wall-card:hover .wall-overlay {
-  opacity: 1;
-}
-
-.wall-actions {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 6px;
-}
-
-.wall-btn {
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 6px;
-  border: none;
-  font-family: "DM Sans", sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-
-.wall-btn.set {
-  background: white;
-  color: var(--text-primary);
-}
-.wall-btn.save {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  backdrop-filter: blur(4px);
-}
-.wall-btn:hover {
-  opacity: 0.85;
-}
-
-.wall-name {
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.wall-heart {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(4px);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.wall-card:hover .wall-heart {
-  opacity: 1;
-}
-
-.wall-heart svg {
-  width: 13px;
-  height: 13px;
-  stroke: white;
-  fill: none;
-  stroke-width: 2;
-}
-
-.wall-heart.liked svg {
-  fill: #ff4d6d;
-  stroke: #ff4d6d;
 }
 
 /* RECENTLY USED */

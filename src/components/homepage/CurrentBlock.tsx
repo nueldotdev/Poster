@@ -1,8 +1,10 @@
 import React from 'react';
 import { Wallpaper } from '../../electron.d';
+import { Skeleton } from '../objects/Skeleton';
 
 interface Props {
   wallpaper: Wallpaper | null;
+  loading?: boolean;
 }
 
 const formatTimeAgo = (ts: number): string => {
@@ -17,7 +19,20 @@ const formatTimeAgo = (ts: number): string => {
   return `${days}d ago`;
 };
 
-const CurrentBlock = ({ wallpaper }: Props) => {
+const CurrentBlock = ({ wallpaper, loading }: Props) => {
+  if (loading) {
+    return (
+      <div className="current-strip">
+        <Skeleton variant="rect" className="current-thumb" />
+        <div className="current-info flex flex-col" style={{ minWidth: 0, flex: 1 }}>
+          <Skeleton variant="text" style={{ width: '80px', marginBottom: '8px' }} />
+          <Skeleton variant="title" style={{ width: '150px' }} />
+          <Skeleton variant="text" style={{ width: '100px', marginTop: '4px' }} />
+        </div>
+      </div>
+    );
+  }
+
   if (!wallpaper) {
     return (
       <div className="current-strip">

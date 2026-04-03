@@ -4,13 +4,17 @@ class OurStore {
   private store = new Store<{
     onboarded: boolean;
     name: string;
+    isPro: boolean;
     wallpapers: Wallpaper[];
+    boards: { id: string, name: string, wallpaperIds: string[] }[];
     recents: { most_recent: Wallpaper; used: Wallpaper[] };
   }>({
     defaults: {
       onboarded: false,
       name: "",
+      isPro: false,
       wallpapers: [],
+      boards: [],
       recents: {
         most_recent: { id: "", filename: "", file: "", addedAt: 0 },
         used: [],
@@ -20,14 +24,14 @@ class OurStore {
 
   public set(name: string, value: any): unknown {
     try {
-      return this.store.set(name, value);
+      return (this.store as any).set(name, value);
     } catch (error) {
       return {error}
     }
   }
   
   public get(name: string) {
-    return this.store.get(name);
+    return (this.store as any).get(name);
   }
   
 }

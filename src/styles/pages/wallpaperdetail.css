@@ -104,8 +104,44 @@
 }
 
 .detail-actions-wrapper {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-enhancement-box {
   margin-top: 24px;
-  width: 100%;
+  padding: 16px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.enhancement-info h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.enhancement-info p {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.secondary.optimized {
+  background: var(--accent-muted);
+  color: var(--accent);
+  border-color: var(--accent);
+  animation: shine 2s infinite linear;
+}
+
+@keyframes shine {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; transform: scale(1.01); }
+  100% { opacity: 0.8; }
 }
 
 .detail-set-btn {

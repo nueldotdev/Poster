@@ -1,11 +1,31 @@
 import React from 'react';
 import { Wallpaper } from '../../electron.d';
+import { Skeleton } from '../objects/Skeleton';
 
 interface Props {
   used: Wallpaper[];
+  loading?: boolean;
 }
 
-const RecentUse = ({ used }: Props) => {
+const RecentUse = ({ used, loading }: Props) => {
+  if (loading) {
+    return (
+      <div>
+        <div className="section-header">
+          <span className="section-title">Recently Used</span>
+        </div>
+        <div className="recents">
+          {[...Array(4)].map((_, i) => (
+            <div className="recent-card" key={i}>
+              <Skeleton variant="rect" className="recent-thumb" />
+              <Skeleton variant="text" style={{ width: '60%', marginTop: '8px' }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (!used || used.length === 0) return null;
 
   return (

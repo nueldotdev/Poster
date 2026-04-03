@@ -1,13 +1,14 @@
-import { app, BrowserWindow, dialog, ipcMain, protocol, net } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, protocol, net, screen } from "electron";
 import started from "electron-squirrel-startup";
 import fs from "fs";
 import path from "path";
 import { v4 as uuid } from "uuid";
-import { pathToFileURL } from "url"; // Needed for robust path parsing
+import { pathToFileURL } from "url"; 
 import { store } from "./store";
 import { Wallpaper } from "./electron.d";
 import { exec } from "child_process";
 import { promisify } from "util";
+import sharp from "sharp";
 
 const execAsync = promisify(exec);
 
@@ -18,7 +19,6 @@ if (started) {
   app.quit();
 }
 
-// 1. Register the scheme BEFORE app is ready
 protocol.registerSchemesAsPrivileged([
   {
     scheme: "localfile",
@@ -27,7 +27,7 @@ protocol.registerSchemesAsPrivileged([
       standard: true,
       supportFetchAPI: true,
       stream: true,
-      bypassCSP: true, // Allows loading images without editing HTML meta tags
+      bypassCSP: true, 
     },
   },
 ]);
@@ -57,21 +57,13 @@ const createWindow = () => {
 };
 
 app.whenReady().then(() => {
-  // 2. Set up the handler for "localfile://"
   protocol.handle("localfile", (request) => {
     try {
-      // 1. Convert "localfile:///C:/..." to a standard URL object
-      // This handles the slashes and drive letters properly
       const url = new URL(request.url);
-
-      // 2. Extract the pathname and decode it (removes %20 for spaces)
-      // On Windows, url.pathname might start with /C:/, so we strip the leading /
       let pathName = decodeURIComponent(url.pathname);
       if (process.platform === "win32" && pathName.startsWith("/")) {
         pathName = pathName.slice(1);
       }
-
-      // 3. Return the file
       return net.fetch(pathToFileURL(path.normalize(pathName)).toString());
     } catch (error) {
       console.error("Localfile protocol error:", error);
@@ -88,56 +80,36 @@ app.on("window-all-closed", () => {
 
 // --- IPC Handlers ---
 
-ipcMain.handle("get-onboarded", async () => {
-  return store.get("onboarded");
-});
-
-ipcMain.handle("set-onboarded", async () => {
+ipcMain.handle("get-onboarded", () => store.get("onboarded"));
+ipcMain.handle("set-onboarded", () => {
   store.set("onboarded", true);
   return { success: true };
 });
 
-// ---- Name
-ipcMain.handle("set-name", async (_event, name: string) => {
+ipcMain.handle("set-name", (_event, name: string) => {
   store.set("name", name);
   store.set("onboarded", true);
-  return {
-    success: store.get("name") === name,
-    name,
-  };
+  return { success: true, name };
 });
 
-
-// ---- Wallpapers
 ipcMain.handle("import-wallpapers", async () => {
   const result = await dialog.showOpenDialog({
     properties: ["openFile", "multiSelections"],
     filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png", "webp"] }],
-    title: "Pick wallpapers to import",
   });
 
   if (result.canceled) return { success: false, wallpapers: [] };
 
   const libraryDir = path.join(app.getPath("userData"), "library");
-  if (!fs.existsSync(libraryDir)) {
-    fs.mkdirSync(libraryDir, { recursive: true });
-  }
+  if (!fs.existsSync(libraryDir)) fs.mkdirSync(libraryDir, { recursive: true });
 
   const existing: Wallpaper[] = store.get("wallpapers") || [];
-
   const imported: Wallpaper[] = result.filePaths.map((filePath) => {
     const id = uuid();
     const ext = path.extname(filePath);
     const filename = `${id}${ext}`;
-    const dest = path.join(libraryDir, filename);
-    fs.copyFileSync(filePath, dest);
-
-    return {
-      id,
-      filename: path.basename(filePath),
-      file: filename,
-      addedAt: Date.now(),
-    };
+    fs.copyFileSync(filePath, path.join(libraryDir, filename));
+    return { id, filename: path.basename(filePath), file: filename, addedAt: Date.now() };
   });
 
   store.set("wallpapers", [...existing, ...imported]);
@@ -145,92 +117,157 @@ ipcMain.handle("import-wallpapers", async () => {
 });
 
 const enrichWithUrl = (w: Wallpaper, libraryDir: string): Wallpaper & { url: string } => {
-  if (!w.file) return { ...w, url: '' };
-  const fullPath = path.join(libraryDir, w.file);
-  const ext = path.extname(w.file).slice(1).toLowerCase();
-  const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+  // Use optimized file if it exists, otherwise use original
+  const relativePath = w.optimizedFile || w.file;
+  if (!relativePath) return { ...w, url: '' };
+  
   try {
+    const fullPath = path.isAbsolute(relativePath) 
+      ? relativePath 
+      : path.join(libraryDir, relativePath);
+      
     const data = fs.readFileSync(fullPath);
+    const ext = path.extname(relativePath).slice(1).toLowerCase();
+    const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
     return { ...w, url: `data:${mime};base64,${data.toString('base64')}` };
-  } catch {
-    return { ...w, url: '' };
+  } catch (e) { 
+    console.error(`Failed to enrich wallpaper ${w.id}:`, e);
+    return { ...w, url: '' }; 
   }
 };
 
-ipcMain.handle("get-wallpapers", async (_event, offset = 0, limit = 20) => {
-  const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+ipcMain.handle("get-wallpapers", (_event, offset = 0, limit = 20, favoritesOnly = false) => {
+  let wallpapers: Wallpaper[] = store.get("wallpapers") || [];
   const libraryDir = path.join(app.getPath("userData"), "library");
-  const recents = store.get("recents") || { most_recent: { id: "", filename: "", file: "", addedAt: 0 }, used: [] };
+  
+  if (favoritesOnly) wallpapers = wallpapers.filter(w => w.isFavorite);
+  
+  const page = wallpapers.filter(w => w.file).slice(offset, offset + limit);
+  const recents = store.get("recents") || { most_recent: null, used: [] };
 
-  const page = wallpapers
-    .filter((w) => w.file)
-    .slice(offset, offset + limit);
-
-  const enrichedMostRecent = recents.most_recent?.file
-    ? enrichWithUrl(recents.most_recent, libraryDir)
-    : recents.most_recent;
-
-  const enrichedUsed = (recents.used as Wallpaper[])
-    .filter((w) => w.file)
-    .map((w) => enrichWithUrl(w, libraryDir))
-    .filter((w) => w.url);
+  const enrichedMostRecent = recents.most_recent 
+    ? enrichWithUrl(recents.most_recent, libraryDir) 
+    : null;
+    
+  const enrichedUsed = (recents.used || [])
+    .map((w: Wallpaper) => enrichWithUrl(w, libraryDir));
 
   return {
-    total: wallpapers.filter((w) => w.file).length,
-    wallpapers: page.map((w) => enrichWithUrl(w, libraryDir)).filter((w) => w.url),
+    total: wallpapers.length,
+    wallpapers: page.map(w => enrichWithUrl(w, libraryDir)),
     recents: {
       most_recent: enrichedMostRecent,
       used: enrichedUsed,
-    },
+    }
   };
-})
-
-
-ipcMain.handle("get-wallpaper", async (_event, id: string) => {
-  const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
-  const wallpaper = wallpapers.find((w) => w.id === id);
-  if (!wallpaper) return null;
-  const libraryDir = path.join(app.getPath("userData"), "library");
-  return enrichWithUrl(wallpaper, libraryDir);
 });
 
-ipcMain.handle("rename-wallpaper", async (_event, id: string, newName: string) => {
+ipcMain.handle("get-wallpaper", (_event, id: string) => {
   const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
-  const index = wallpapers.findIndex((w) => w.id === id);
-  if (index === -1) return { success: false };
+  const w = wallpapers.find(w => w.id === id);
+  return w ? enrichWithUrl(w, path.join(app.getPath("userData"), "library")) : null;
+});
 
-  wallpapers[index].filename = newName;
+ipcMain.handle("rename-wallpaper", (_event, id: string, newName: string) => {
+  const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+  const idx = wallpapers.findIndex(w => w.id === id);
+  if (idx === -1) return { success: false };
+  wallpapers[idx].filename = newName;
   store.set("wallpapers", wallpapers);
-
-  // Update recents as well
-  const recents: any = store.get("recents") || { most_recent: { id: "", filename: "", file: "", addedAt: 0 }, used: [] };
-  let recentsUpdated = false;
-  if (recents.most_recent?.id === id) {
-    recents.most_recent.filename = newName;
-    recentsUpdated = true;
-  }
-  const usedIndex = (recents.used as Wallpaper[]).findIndex((w: Wallpaper) => w.id === id);
-  if (usedIndex !== -1) {
-    recents.used[usedIndex].filename = newName;
-    recentsUpdated = true;
-  }
-  
-  if (recentsUpdated) {
-     store.set("recents", recents);
-  }
-
   return { success: true, name: newName };
 });
 
+ipcMain.handle("toggle-favorite", (_event, id: string) => {
+  const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+  const idx = wallpapers.findIndex(w => w.id === id);
+  if (idx === -1) return { success: false };
+  wallpapers[idx].isFavorite = !wallpapers[idx].isFavorite;
+  store.set("wallpapers", wallpapers);
+  return { success: true, isFavorite: wallpapers[idx].isFavorite };
+});
 
-ipcMain.handle("set-wallpaper", async (_event, w: Wallpaper) => {
+ipcMain.handle("get-pro-status", () => store.get("isPro") || false);
+ipcMain.handle("toggle-pro", () => {
+  const current = store.get("isPro") || false;
+  store.set("isPro", !current);
+  return !current;
+});
+
+ipcMain.handle("get-boards", () => store.get("boards") || []);
+ipcMain.handle("create-board", (_event, name: string) => {
+  const boards = store.get("boards") || [];
+  const newBoard = { id: uuid(), name, wallpaperIds: [] };
+  store.set("boards", [...boards, newBoard]);
+  return newBoard;
+});
+
+ipcMain.handle("optimize-wallpaper", async (_event, id, options) => {
+  try {
+    const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+    const idx = wallpapers.findIndex(w => w.id === id);
+    if (idx === -1) return { success: false };
+
+    const w = wallpapers[idx];
+    const libraryDir = path.join(app.getPath("userData"), "library");
+    const optimizedDir = path.join(libraryDir, "optimized");
+    if (!fs.existsSync(optimizedDir)) fs.mkdirSync(optimizedDir, { recursive: true });
+
+    const display = screen.getPrimaryDisplay();
+    const scale = display.scaleFactor || 1;
+    const width = Math.round(display.size.width * scale);
+    const height = Math.round(display.size.height * scale);
+
+    const fileName = `opt-${w.id}.webp`;
+    const dest = path.join(optimizedDir, fileName);
+
+    await sharp(path.join(libraryDir, w.file))
+      .rotate(options?.rotate || 0)
+      .resize({ width, height, fit: options?.fit || "cover", position: options?.position || "center" })
+      .modulate({ brightness: options?.brightness || 1.05, saturation: options?.saturation || 1.15 })
+      .sharpen({ sigma: 1.5 })
+      .webp({ quality: 100 })
+      .toFile(dest);
+
+    wallpapers[idx].optimizedFile = path.join("optimized", fileName);
+    store.set("wallpapers", wallpapers);
+    return { success: true };
+  } catch (e) {
+    console.error("Optimize failed:", e);
+    return { success: false };
+  }
+});
+
+ipcMain.handle("preview-wallpaper", async (_event, id, options) => {
+  try {
+    const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+    const w = wallpapers.find(w => w.id === id);
+    if (!w) return { success: false };
+
+    const libraryDir = path.join(app.getPath("userData"), "library");
+    const display = screen.getPrimaryDisplay();
+    const scale = display.scaleFactor || 1;
+    const width = Math.round(display.size.width * scale);
+    const height = Math.round(display.size.height * scale);
+
+    const buffer = await sharp(path.join(libraryDir, w.file))
+      .rotate(options?.rotate || 0)
+      .resize({ width, height, fit: options?.fit || "cover", position: options?.position || "center" })
+      .modulate({ brightness: options?.brightness || 1.05, saturation: options?.saturation || 1.15 })
+      .sharpen({ sigma: 1.5 })
+      .webp({ quality: 90 })
+      .toBuffer();
+
+    return { success: true, url: `data:image/webp;base64,${buffer.toString("base64")}` };
+  } catch (e) {
+    console.error("Preview failed:", e);
+    return { success: false };
+  }
+});
+
+ipcMain.handle("set-wallpaper", async (_event, w) => {
   try {
     const libraryDir = path.join(app.getPath("userData"), "library");
-    const filePath = path.resolve(libraryDir, w.file);
-    
-    // console.log("Setting wallpaper to:", filePath);
-
-    // The PowerShell script with proper newlines
+    const filePath = path.resolve(libraryDir, w.optimizedFile || w.file);
     const psScript = `
 $code = @'
 using System.Runtime.InteropServices;
@@ -242,41 +279,23 @@ public class Win32 {
 Add-Type -TypeDefinition $code
 [Win32]::SystemParametersInfo(20, 0, "${filePath}", 3)
 `.trim();
-
-    // Convert to base64 (UTF-16LE) to handle all special characters/quotes safely
-    const encodedCommand = Buffer.from(psScript, "utf16le").toString("base64");
-
-    await execAsync(`powershell.exe -ExecutionPolicy Bypass -EncodedCommand ${encodedCommand}`, {
-      windowsHide: true,
+    const encoded = Buffer.from(psScript, "utf16le").toString("base64");
+    await execAsync(`powershell.exe -ExecutionPolicy Bypass -EncodedCommand ${encoded}`, { windowsHide: true });
+    
+    // Update recents
+    const recents = store.get("recents") || { used: [] };
+    // Multi-MB base64 blob is always recomputed from disk on read
+    const { url: _, ...wToStore } = w;
+    const used = [wToStore, ...(recents.used || []).filter((u: any) => u.id !== w.id)].slice(0, 3);
+    
+    store.set("recents", {
+      most_recent: wToStore,
+      used
     });
 
-    await lastUsed(w);
-
     return { success: true };
-  } catch (e: any) {
+  } catch (e) {
     console.error("Set wallpaper failed:", e);
-    return { success: false, error: e.message };
+    return { success: false };
   }
 });
-
-
-// ---- History
-// type useInfo = {
-//   file: string;
-//   timestamp?: number;
-//   date: string;
-// }
-
-
-const lastUsed = async (wallpaper: Wallpaper) => {
-  const recents = store.get("recents") || { most_recent: { id: "", filename: "", file: "", addedAt: 0 }, used: [] };
-  // Strip url — it's a multi-MB base64 blob, always recomputed from disk on read
-  const { url: _url, ...wallpaperToStore } = wallpaper as Wallpaper & { url?: string };
-  const updatedRecents = {
-    ...recents,
-    most_recent: wallpaperToStore,
-    used: [wallpaperToStore, ...recents.used.filter((w: Wallpaper) => w.file !== wallpaper.file)],
-  };
-  store.set("recents", updatedRecents);
-};
-

@@ -131,18 +131,26 @@
 /* gallery grid */
 .wall-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  width: 100%;
 }
 
 .wall-card {
   position: relative;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
-  aspect-ratio: 16/10;
+  aspect-ratio: 16 / 10;
   cursor: pointer;
-  background: var(--surface);
-  border: 0.5px solid var(--border);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  min-height: 200px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wall-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 
 .wall-img {
@@ -168,7 +176,7 @@
 
 .wall-actions {
   display: flex;
-  gap: 6px;
+  row-gap: 1rem;
   justify-content: flex-end;
 }
 
@@ -185,8 +193,12 @@
 }
 
 .wall-btn.set {
-  background: white;
+  /* background: white; */
   color: var(--text);
+}
+
+.wall-btn.liked {
+  color: var(--accent);
 }
 
 .wall-btn.set:hover {
@@ -221,15 +233,15 @@
 .wall-list-item:hover { border-color: var(--accent); }
 
 .wall-list-thumb {
-  width: 64px;
-  height: 40px;
+  width: 200px;
+  height: 112px;
   border-radius: 6px;
   object-fit: cover;
   flex-shrink: 0;
+  margin-right: 16px;
 }
 
 .wall-list-name {
-  font-size: 13px;
   font-weight: 500;
   color: var(--text);
 }

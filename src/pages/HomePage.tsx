@@ -7,41 +7,39 @@ import { Wallpaper } from "../electron.d";
 import { toast } from "sonner";
 
 export default function HomePage() {
-  const [wallpapers, setWallpapers] = useState<Wallpaper[]>([]);
   const [mostRecent, setMostRecent] = useState<Wallpaper | null>(null);
   const [used, setUsed] = useState<Wallpaper[]>([]);
-  const [setting, setSetting] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const fetchWallpapers = () => {
-    window.api.getWallpapers().then((res) => {
-      setWallpapers(res.wallpapers);
+  const fetchRecents = () => {
+    setLoading(true);
+    window.api.getWallpapers(0, 1).then((res) => {
       if (res.recents?.most_recent?.file) {
         setMostRecent(res.recents.most_recent);
       }
       setUsed(res.recents?.used ?? []);
+      setLoading(false);
     });
   };
 
   useEffect(() => {
-    fetchWallpapers();
+    fetchRecents();
   }, []);
 
   const handleSet = async (wallpaper: Wallpaper) => {
-    setSetting(wallpaper.id);
     const result = await window.api.setWallpaper(wallpaper);
     if (result.success) {
       toast.success(`${wallpaper.filename} set as wallpaper`);
-      fetchWallpapers();
+      fetchRecents();
     } else {
       toast.error("Failed to set wallpaper");
     }
-    setSetting(null);
   };
 
   return (
     <div className="page-container slide-up fade-in">
-      <CurrentBlock wallpaper={mostRecent} />
-      {used.length > 0 && <RecentUse used={used} />}
+      <CurrentBlock wallpaper={mostRecent} loading={loading} />
+      {(used.length > 0 || loading) && <RecentUse used={used} loading={loading} />}
       <div className="w-full">
         <Collection onSetWallpaper={handleSet} />
       </div>

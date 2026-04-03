@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Onboarding from "./pages/onboarding/Onboarding";
 import { Toaster } from "sonner";
 import RecentsPage from "./pages/RecentsPage";
+import WallpaperDetail from "./pages/WallpaperDetail";
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
           <Route index element={<HomePage />} />
           <Route path="recents" element={<RecentsPage />} />
           <Route path="about" element={<AboutPage />} />
+          <Route path="wallpaper/:id" element={<WallpaperDetail />} />
         </Route>
       </Routes>
     </Router>

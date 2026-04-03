@@ -8,6 +8,7 @@ interface ComponentProps extends React.HTMLAttributes<HTMLElement> {
   animation?: 'fade' | 'slide-up' | 'slide-down' | 'scale';
   visible?: boolean = true;
   visibleDuration?: number;
+  disabled?: boolean;
 
   type?: 'filled' | 'outline' | 'muted';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl';

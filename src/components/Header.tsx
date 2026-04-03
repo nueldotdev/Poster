@@ -1,34 +1,63 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 // import { Button } from "./objects/Button";
 import { navItems } from "../hooks/navItems";
+import { Sparkles } from "lucide-react";
 
 
 export const Header = () => {
 
   const location = useLocation();
+  const [enhancementCount, setEnhancementCount] = useState(0);
 
   const getPageTitle = () => {
     const currentItem = navItems.find(item => item.path === location.pathname);
     return currentItem ? currentItem.name : '';
   }
 
+  const updateCount = () => {
+    window.api.getEnhancementCount().then((count: number) => {
+      setEnhancementCount(count);
+    });
+  };
+
+  useEffect(() => {
+    updateCount();
+    // Refresh count periodically in case it changes elsewhere
+    const interval = setInterval(updateCount, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
 
   return (
     <header className="topbar">
       <span className="topbar-title">{getPageTitle()}</span>
-      <div className="search-bar">
-        <svg viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-        <input type="text" placeholder="Search wallpapers..." />
+      <div className="topbar-actions flex items-center gap-12 ml-auto">
+        
+        <div className="search-bar">
+          <svg viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" placeholder="Search wallpapers..." />
+        </div>
+        <div
+          className="ai-counter flex items-center gap-6"
+          title="Global AI Enhancement Uses"
+          style={{
+            background: 'var(--surface-2)',
+            padding: '4px 12px',
+            borderRadius: '10px',
+            fontSize: '12px',
+            fontWeight: 600,
+            color: enhancementCount >= 5 ? 'var(--text-muted)' : 'var(--accent)',
+            border: '1px solid var(--border)'
+          }}
+        >
+          <Sparkles size={14} color={enhancementCount >= 5 ? 'var(--text-muted)' : 'var(--accent)'} />
+          <span>{enhancementCount}/5 AI</span>
+        </div>
       </div>
-      {/* <div className="topbar-actions">
-        <Button className="rounded-sm primary" size="md">
-          <PlusIcon size={18} className="mr-2" />
-        </Button>
-      </div> */}
     </header>
   );
 };

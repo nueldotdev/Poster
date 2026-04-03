@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit3, Check, X } from "lucide-react";
+import { ArrowLeft, Edit3, Check, X, Sparkles } from "lucide-react";
 import { Wallpaper, OptimizeOptions } from "../electron.d";
 import { Button } from "../components/objects/Button";
 import { WallpaperPreview } from "../components/WallpaperPreview";
@@ -19,6 +19,8 @@ export default function WallpaperDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState("");
   const [optimizing, setOptimizing] = useState(false);
+  const [aiEnhancing, setAiEnhancing] = useState(false);
+  const [enhancementCount, setEnhancementCount] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -28,6 +30,9 @@ export default function WallpaperDetail() {
         setWallpaper(res);
         setEditName(res?.filename.replace(/\.[^/.]+$/, "") || "");
         setLoading(false);
+      });
+      window.api.getEnhancementCount().then((count: number) => {
+        setEnhancementCount(count);
       });
     }
   }, [id]);
@@ -59,6 +64,25 @@ export default function WallpaperDetail() {
       toast.error("Optimization failed");
     }
     setOptimizing(false);
+  };
+
+  const handleAIEnhance = async () => {
+    if (!id) return;
+    if (enhancementCount >= 5) {
+      toast.error("Enhancement limit (5) reached.");
+      return;
+    }
+    
+    setAiEnhancing(true);
+    const result = await window.api.enhanceWallpaper(id);
+    if (result.success) {
+      toast.success("AI Enhancement complete! Previewing... ✨");
+      setEnhancementCount(result.count);
+      setShowPreview(true); // Open the preview window with the AI result
+    } else {
+      toast.error(result.error || "AI Enhancement failed");
+    }
+    setAiEnhancing(false);
   };
 
   const startEnhancement = () => {
@@ -124,7 +148,10 @@ export default function WallpaperDetail() {
         <WallpaperPreview 
           id={id} 
           onSave={(options) => handleOptimize(options)} 
-          onCancel={() => setShowPreview(false)} 
+          onCancel={async () => {
+            setShowPreview(false);
+            await window.api.cancelEnhancement(id);
+          }} 
         />
       )}
 
@@ -250,17 +277,46 @@ export default function WallpaperDetail() {
 
             <div className="detail-enhancement-box">
               <div className="enhancement-info">
-                <h3>Image Enhancement</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <h3>Image Enhancement</h3>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: enhancementCount >= 5 ? 'var(--accent)' : 'var(--text-muted)', background: 'rgba(0,0,0,0.05)', padding: '2px 8px', borderRadius: '10px' }}>
+                    {enhancementCount}/5 AI USES
+                  </span>
+                </div>
                 <p>Resize and sharpen this image for your monitor's resolution.</p>
               </div>
-              <Button
-                className={`secondary rounded-sm ${wallpaper.optimizedFile ? 'optimized' : ''}`}
-                onClick={startEnhancement}
-                disabled={optimizing}
-                style={{ width: '100%', marginTop: '12px' }}
-              >
-                {optimizing ? "Optimizing..." : wallpaper.optimizedFile ? "Optimized ✨ Refresh" : "✨ Enhance & Optimize"}
-              </Button>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                <Button
+                  className={`secondary rounded-sm ${wallpaper.optimizedFile ? 'optimized' : ''}`}
+                  onClick={startEnhancement}
+                  disabled={optimizing || aiEnhancing}
+                  style={{ width: '100%' }}
+                >
+                  {optimizing ? "Optimizing..." : "✨ Auto-Enhance & Preview"}
+                </Button>
+
+                <Button
+                  className="secondary rounded-sm"
+                  onClick={handleAIEnhance}
+                  disabled={aiEnhancing || optimizing || enhancementCount >= 5}
+                  style={{ 
+                    width: '100%', 
+                    background: 'var(--text-primary)', 
+                    color: 'white',
+                    border: 'none'
+                  }}
+                >
+                  {aiEnhancing ? (
+                    "AI Processing..."
+                  ) : (
+                    <>
+                      <Sparkles size={14} style={{ marginRight: '8px' }} />
+                      AI Enhancement
+                    </>
+                  )}
+                </Button>
+              </div>
           </div>
         </div>
       </div>

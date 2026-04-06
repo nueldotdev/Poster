@@ -9,11 +9,10 @@ Poster is a premium, high-fidelity Electron application designed to give you tot
 
 ## ✨ Features
 
-### 🚀 High-Fidelity Local Processing
-Don't settle for blurry, unoptimized backgrounds. Poster uses the power of **Sharp** for local image processing to:
-- **Rescale** images to your monitor’s exact native resolution.
-- **Sharpen** and increase clarity for a crisp, high-end look.
-- **Color Grade** images for a "crafted for your device" feel.
+### 🚀 Optimized Desktop Fit
+Poster uses the power of **Sharp** for fast, local image processing to:
+- **Rescale & Crop** images flawlessly to your monitor’s exact native resolution.
+- **Normalize Formats** to guarantee smooth application and reliable rendering.
 
 ### ⚡ Instant Application
 Set your wallpaper directly from the app. No more digging through system settings. Supports multiple file formats (JPG, PNG, WEBP).

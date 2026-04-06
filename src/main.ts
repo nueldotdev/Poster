@@ -10,6 +10,7 @@ import { Wallpaper } from "./electron.d";
 import { exec } from "child_process";
 import { promisify } from "util";
 import sharp from "sharp";
+import { setWallpaper } from "wallpaper";
 
 const execAsync = promisify(exec);
 
@@ -374,19 +375,9 @@ ipcMain.handle("set-wallpaper", async (_event, w) => {
   try {
     const libraryDir = path.join(app.getPath("userData"), "library");
     const filePath = path.resolve(libraryDir, w.optimizedFile || w.file);
-    const psScript = `
-$code = @'
-using System.Runtime.InteropServices;
-public class Win32 {
-    [DllImport("user32.dll", CharSet=CharSet.Auto)]
-    public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
-}
-'@
-Add-Type -TypeDefinition $code
-[Win32]::SystemParametersInfo(20, 0, "${filePath}", 3)
-`.trim();
-    const encoded = Buffer.from(psScript, "utf16le").toString("base64");
-    await execAsync(`powershell.exe -ExecutionPolicy Bypass -EncodedCommand ${encoded}`, { windowsHide: true });
+    
+    // Cross-platform wallpaper setting
+    await setWallpaper(filePath);
     
     // Update recents
     const recents = store.get("recents") || { used: [] };

@@ -8,6 +8,7 @@ import Onboarding from "./pages/onboarding/Onboarding";
 import { Toaster } from "sonner";
 import FavoritesPage from "./pages/FavoritesPage";
 import WallpaperDetail from "./pages/WallpaperDetail";
+import SettingsPage from "./pages/SettingsPage";
 
 const App = () => {
   return (
@@ -35,6 +36,7 @@ const App = () => {
           <Route path="favorites" element={<FavoritesPage />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="wallpaper/:id" element={<WallpaperDetail />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </Router>

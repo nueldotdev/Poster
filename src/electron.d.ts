@@ -19,6 +19,12 @@ export interface ElectronAPI {
   addWallpaperToBoard: (wallpaperId: string, boardId: string) => Promise<{ success: boolean }>
   optimizeWallpaper: (id: string, options?: OptimizeOptions) => Promise<{ success: boolean }>
   previewWallpaper: (id: string, options?: OptimizeOptions) => Promise<{ success: boolean, url?: string }>
+  getEnhancementCount: () => Promise<number>
+  enhanceWallpaper: (id: string) => Promise<{ success: boolean, error?: string, url?: string, count?: number }>;
+  cancelEnhancement: (id: string) => Promise<{ success: boolean }>
+
+
+  showMeStore: () => Promise<{ store: any }>
 }
 
 export interface OptimizeOptions {

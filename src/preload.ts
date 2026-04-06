@@ -26,6 +26,5 @@ contextBridge.exposeInMainWorld("api", {
   getWallpaperSize: (id: string) => ipcRenderer.invoke("get-wallpaper-size", id),
   getWallpaperDimensions: (id: string) => ipcRenderer.invoke("get-wallpaper-dimensions", id),
   getWallpaperTags: (id: string) => ipcRenderer.invoke("get-wallpaper-tags", id),
-  
-  
+  showMeStore: () => ipcRenderer.invoke("show-me-store"),
 });

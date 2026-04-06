@@ -41,7 +41,7 @@ const Navigation = () => {
         ))}
       </ul>
 
-      {!isPro && (
+      {/* {!isPro && ( 
         <div className='sidebar-footer'>
           <div className='pro-card'>
             <div className='pro-card-info'>
@@ -53,7 +53,7 @@ const Navigation = () => {
             </Button>
           </div>
         </div>
-      )}
+       )} */}
     </nav>
   );
 }

@@ -5,6 +5,7 @@ class OurStore {
     onboarded: boolean;
     name: string;
     isPro: boolean;
+    enhancementCount: number;
     wallpapers: Wallpaper[];
     boards: { id: string, name: string, wallpaperIds: string[] }[];
     recents: { most_recent: Wallpaper; used: Wallpaper[] };
@@ -13,6 +14,7 @@ class OurStore {
       onboarded: false,
       name: "",
       isPro: false,
+      enhancementCount: 0,
       wallpapers: [],
       boards: [],
       recents: {
@@ -32,6 +34,10 @@ class OurStore {
   
   public get(name: string) {
     return (this.store as any).get(name);
+  }
+
+  public all() {
+    return this.store.store;
   }
   
 }

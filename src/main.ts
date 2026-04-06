@@ -1,4 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain, protocol, net, screen } from "electron";
+import { autoUpdater } from 'electron-updater';
 import started from "electron-squirrel-startup";
 import fs from "fs";
 import path from "path";
@@ -56,7 +57,11 @@ const createWindow = () => {
   mainWindow.setTitle("Poster");
 };
 
+
+
 app.whenReady().then(() => {
+  autoUpdater.checkForUpdatesAndNotify();
+
   protocol.handle("localfile", (request) => {
     try {
       const url = new URL(request.url);
@@ -80,7 +85,12 @@ app.on("window-all-closed", () => {
 
 // --- IPC Handlers ---
 
-ipcMain.handle("get-onboarded", () => store.get("onboarded"));
+ipcMain.handle("show-me-store", () => {
+  const values = store.all()
+  console.log(values)
+})
+
+ipcMain.handle("get-onboarded", () => store.get("onboarded") || false);
 ipcMain.handle("set-onboarded", () => {
   store.set("onboarded", true);
   return { success: true };

@@ -9,7 +9,7 @@ import { store } from "./store";
 import { Wallpaper } from "./electron.d";
 import { exec } from "child_process";
 import { promisify } from "util";
-import sharp from "sharp";
+// import sharp from "sharp";
 import { setWallpaper } from "wallpaper";
 
 const execAsync = promisify(exec);
@@ -207,82 +207,87 @@ ipcMain.handle("toggle-pro", () => {
 ipcMain.handle("get-boards", () => store.get("boards") || []);
 ipcMain.handle("create-board", (_event, name: string) => {
   const boards = store.get("boards") || [];
-  const newBoard = { id: uuid(), name, wallpaperIds: [] };
+  const newBoard = { id: uuid(), name };
   store.set("boards", [...boards, newBoard]);
   return newBoard;
 });
 
-ipcMain.handle("enhance-wallpaper", async (_event, id) => {
-  try {
-    const enhancementCount = store.get("enhancementCount") || 0;
-    if (enhancementCount >= 5) {
-      return { success: false, error: "Enhancement limit (5) reached." };
-    }
+// ipcMain.handle("enhance-wallpaper", async (_event, id) => {
+//   try {
+//     const enhancementCount = store.get("enhancementCount") || 0;
+//     if (enhancementCount >= 5) {
+//       return { success: false, error: "Enhancement limit (5) reached." };
+//     }
 
-    const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
-    const w = wallpapers.find((w) => w.id === id);
-    if (!w) return { success: false, error: "Wallpaper not found" };
+//     const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+//     const w = wallpapers.find((w) => w.id === id);
+//     if (!w) return { success: false, error: "Wallpaper not found" };
 
-    const libraryDir = path.join(app.getPath("userData"), "library");
-    const stagingDir = path.join(libraryDir, "staging");
-    if (!fs.existsSync(stagingDir)) fs.mkdirSync(stagingDir, { recursive: true });
+//     const libraryDir = path.join(app.getPath("userData"), "library");
+//     const stagingDir = path.join(libraryDir, "staging");
+//     if (!fs.existsSync(stagingDir)) fs.mkdirSync(stagingDir, { recursive: true });
 
-    // Get image as base64 to send to backend
-    const filePath = path.join(libraryDir, w.file);
-    const data = fs.readFileSync(filePath);
-    const ext = path.extname(w.file).slice(1).toLowerCase();
-    const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
-    const base64Image = `data:${mime};base64,${data.toString('base64')}`;
+//     // Get image as base64 to send to backend
+//     const filePath = path.join(libraryDir, w.file);
+//     const data = fs.readFileSync(filePath);
+//     const ext = path.extname(w.file).slice(1).toLowerCase();
+//     const mime = ext === 'png' ? 'image/png' : 'image/jpeg';
+//     const base64Image = `data:${mime};base64,${data.toString('base64')}`;
 
-    const response = await net.fetch("http://localhost:5000/api/enhance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageBase64: base64Image }),
-    });
+//     const response = await net.fetch("http://localhost:5000/api/enhance", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ imageBase64: base64Image }),
+//     });
 
-    if (!response.ok) {
-      const err = await response.json();
-      return { success: false, error: err.error || "Backend request failed" };
-    }
+//     if (!response.ok) {
+//       const err = await response.json();
+//       return { success: false, error: err.error || "Backend request failed" };
+//     }
 
-    const result = await response.json();
-    let upscaledUrl = result.upscaledImageUrl;
-    if (Array.isArray(upscaledUrl)) upscaledUrl = upscaledUrl[0];
-    if (upscaledUrl && typeof upscaledUrl === 'object' && upscaledUrl.url) upscaledUrl = upscaledUrl.url;
+//     const result = await response.json();
+//     let upscaledUrl = result.upscaledImageUrl;
+//     if (Array.isArray(upscaledUrl)) upscaledUrl = upscaledUrl[0];
+//     if (upscaledUrl && typeof upscaledUrl === 'object' && upscaledUrl.url) upscaledUrl = upscaledUrl.url;
 
-    if (result.success && typeof upscaledUrl === 'string') {
-      const imageResponse = await net.fetch(upscaledUrl);
-      const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+//     if (result.success && typeof upscaledUrl === 'string') {
+//       const imageResponse = await net.fetch(upscaledUrl);
+//       const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
       
-      const stagingPath = path.join(stagingDir, `staging-${id}.webp`);
+//       const stagingPath = path.join(stagingDir, `staging-${id}.webp`);
       
-      // Save original AI result to staging
-      await sharp(imageBuffer).webp({ quality: 100 }).toFile(stagingPath);
+//       // Save original AI result to staging
+//       await sharp(imageBuffer).webp({ quality: 100 }).toFile(stagingPath);
       
-      // Return a preview URL of the staged image
-      const display = screen.getPrimaryDisplay();
-      const scale = display.scaleFactor || 1;
-      const width = Math.round(display.size.width * scale);
-      const height = Math.round(display.size.height * scale);
+//       // Return a preview URL of the staged image
+//       const display = screen.getPrimaryDisplay();
+//       const scale = display.scaleFactor || 1;
+//       const width = Math.round(display.size.width * scale);
+//       const height = Math.round(display.size.height * scale);
 
-      const buffer = await sharp(stagingPath)
-        .resize({ width, height, fit: "cover", position: "center" })
-        .webp({ quality: 90 })
-        .toBuffer();
+//       const buffer = await sharp(stagingPath)
+//         .resize({ width, height, fit: "cover", position: "center" })
+//         .webp({ quality: 90 })
+//         .toBuffer();
 
-      return { 
-        success: true, 
-        url: `data:image/webp;base64,${buffer.toString("base64")}`,
-        count: enhancementCount + 1 
-      };
-    }
+//       return { 
+//         success: true, 
+//         url: `data:image/webp;base64,${buffer.toString("base64")}`,
+//         count: enhancementCount + 1 
+//       };
+//     }
 
-    return { success: false, error: "Failed to parse enhanced image URL" };
-  } catch (e) {
-    console.error("Enhancement failed:", e);
-    return { success: false, error: e.message };
-  }
+//     return { success: false, error: "Failed to parse enhanced image URL" };
+//   } catch (e) {
+//     console.error("Enhancement failed:", e);
+//     return { success: false, error: e.message };
+//   }
+// });
+
+ipcMain.handle("enhance-wallpaper", async () => {
+  return { success: false, error: "Enhancement coming soon." };
 });
+
 
 ipcMain.handle("cancel-enhancement", (_event, id) => {
   const libraryDir = path.join(app.getPath("userData"), "library");
@@ -295,80 +300,99 @@ ipcMain.handle("cancel-enhancement", (_event, id) => {
 
 ipcMain.handle("get-enhancement-count", () => store.get("enhancementCount") || 0);
 
-ipcMain.handle("optimize-wallpaper", async (_event, id, options) => {
-  try {
-    const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
-    const idx = wallpapers.findIndex(w => w.id === id);
-    if (idx === -1) return { success: false };
+// ipcMain.handle("optimize-wallpaper", async (_event, id, options) => {
+//   try {
+//     const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+//     const idx = wallpapers.findIndex(w => w.id === id);
+//     if (idx === -1) return { success: false };
 
-    const w = wallpapers[idx];
-    const libraryDir = path.join(app.getPath("userData"), "library");
-    const optimizedDir = path.join(libraryDir, "optimized");
-    if (!fs.existsSync(optimizedDir)) fs.mkdirSync(optimizedDir, { recursive: true });
+//     const w = wallpapers[idx];
+//     const libraryDir = path.join(app.getPath("userData"), "library");
+//     const optimizedDir = path.join(libraryDir, "optimized");
+//     if (!fs.existsSync(optimizedDir)) fs.mkdirSync(optimizedDir, { recursive: true });
 
-    const stagingPath = path.join(libraryDir, "staging", `staging-${id}.webp`);
-    const sourcePath = fs.existsSync(stagingPath) ? stagingPath : path.join(libraryDir, w.file);
+//     const stagingPath = path.join(libraryDir, "staging", `staging-${id}.webp`);
+//     const sourcePath = fs.existsSync(stagingPath) ? stagingPath : path.join(libraryDir, w.file);
 
-    const display = screen.getPrimaryDisplay();
-    const scale = display.scaleFactor || 1;
-    const width = Math.round(display.size.width * scale);
-    const height = Math.round(display.size.height * scale);
+//     const display = screen.getPrimaryDisplay();
+//     const scale = display.scaleFactor || 1;
+//     const width = Math.round(display.size.width * scale);
+//     const height = Math.round(display.size.height * scale);
 
-    const fileName = `opt-${w.id}.webp`;
-    const dest = path.join(optimizedDir, fileName);
+//     const fileName = `opt-${w.id}.webp`;
+//     const dest = path.join(optimizedDir, fileName);
 
-    await sharp(sourcePath)
-      .rotate(options?.rotate || 0)
-      .resize({ width, height, fit: options?.fit || "cover", position: options?.position || "center" })
-      .modulate({ brightness: options?.brightness || 1.05, saturation: options?.saturation || 1.15 })
-      .sharpen({ sigma: 1.5 })
-      .webp({ quality: 100 })
-      .toFile(dest);
+//     await sharp(sourcePath)
+//       .rotate(options?.rotate || 0)
+//       .resize({ width, height, fit: options?.fit || "cover", position: options?.position || "center" })
+//       .modulate({ brightness: options?.brightness || 1.05, saturation: options?.saturation || 1.15 })
+//       .sharpen({ sigma: 1.5 })
+//       .webp({ quality: 100 })
+//       .toFile(dest);
 
-    // If we used a staging file, it means this was an AI enhancement, so increment count
-    if (fs.existsSync(stagingPath)) {
-      const count = store.get("enhancementCount") || 0;
-      store.set("enhancementCount", count + 1);
-      fs.unlinkSync(stagingPath);
-    }
+//     // If we used a staging file, it means this was an AI enhancement, so increment count
+//     if (fs.existsSync(stagingPath)) {
+//       const count = store.get("enhancementCount") || 0;
+//       store.set("enhancementCount", count + 1);
+//       fs.unlinkSync(stagingPath);
+//     }
 
-    wallpapers[idx].optimizedFile = path.join("optimized", fileName);
-    store.set("wallpapers", wallpapers);
-    return { success: true };
-  } catch (e) {
-    console.error("Optimize failed:", e);
-    return { success: false };
-  }
+//     wallpapers[idx].optimizedFile = path.join("optimized", fileName);
+//     store.set("wallpapers", wallpapers);
+//     return { success: true };
+//   } catch (e) {
+//     console.error("Optimize failed:", e);
+//     return { success: false };
+//   }
+// });
+
+// ipcMain.handle("preview-wallpaper", async (_event, id, options) => {
+//   try {
+//     const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+//     const w = wallpapers.find(w => w.id === id);
+//     if (!w) return { success: false };
+
+//     const libraryDir = path.join(app.getPath("userData"), "library");
+//     const stagingPath = path.join(libraryDir, "staging", `staging-${id}.webp`);
+//     const sourcePath = fs.existsSync(stagingPath) ? stagingPath : path.join(libraryDir, w.file);
+
+//     const display = screen.getPrimaryDisplay();
+//     const scale = display.scaleFactor || 1;
+//     const width = Math.round(display.size.width * scale);
+//     const height = Math.round(display.size.height * scale);
+
+//     const buffer = await sharp(sourcePath)
+//       .rotate(options?.rotate || 0)
+//       .resize({ width, height, fit: options?.fit || "cover", position: options?.position || "center" })
+//       .modulate({ brightness: options?.brightness || 1.05, saturation: options?.saturation || 1.15 })
+//       .sharpen({ sigma: 1.5 })
+//       .webp({ quality: 90 })
+//       .toBuffer();
+
+//     return { success: true, url: `data:image/webp;base64,${buffer.toString("base64")}` };
+//   } catch (e) {
+//     console.error("Preview failed:", e);
+//     return { success: false };
+//   }
+// });
+
+ipcMain.handle("optimize-wallpaper", async () => {
+  return { success: false, error: "Coming soon." };
 });
 
-ipcMain.handle("preview-wallpaper", async (_event, id, options) => {
-  try {
-    const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
-    const w = wallpapers.find(w => w.id === id);
-    if (!w) return { success: false };
 
-    const libraryDir = path.join(app.getPath("userData"), "library");
-    const stagingPath = path.join(libraryDir, "staging", `staging-${id}.webp`);
-    const sourcePath = fs.existsSync(stagingPath) ? stagingPath : path.join(libraryDir, w.file);
+ipcMain.handle("preview-wallpaper", async (_event, id) => {
+  const wallpapers: Wallpaper[] = store.get("wallpapers") || [];
+  const w = wallpapers.find(w => w.id === id);
+  if (!w) return { success: false };
 
-    const display = screen.getPrimaryDisplay();
-    const scale = display.scaleFactor || 1;
-    const width = Math.round(display.size.width * scale);
-    const height = Math.round(display.size.height * scale);
+  const libraryDir = path.join(app.getPath("userData"), "library");
+  const sourcePath = path.join(libraryDir, w.file);
+  const data = fs.readFileSync(sourcePath);
+  const ext = path.extname(w.file).slice(1).toLowerCase();
+  const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
 
-    const buffer = await sharp(sourcePath)
-      .rotate(options?.rotate || 0)
-      .resize({ width, height, fit: options?.fit || "cover", position: options?.position || "center" })
-      .modulate({ brightness: options?.brightness || 1.05, saturation: options?.saturation || 1.15 })
-      .sharpen({ sigma: 1.5 })
-      .webp({ quality: 90 })
-      .toBuffer();
-
-    return { success: true, url: `data:image/webp;base64,${buffer.toString("base64")}` };
-  } catch (e) {
-    console.error("Preview failed:", e);
-    return { success: false };
-  }
+  return { success: true, url: `data:${mime};base64,${data.toString('base64')}` };
 });
 
 ipcMain.handle("set-wallpaper", async (_event, w) => {

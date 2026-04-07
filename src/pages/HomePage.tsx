@@ -32,7 +32,8 @@ export default function HomePage() {
       toast.success(`${wallpaper.filename} set as wallpaper`);
       fetchRecents();
     } else {
-      toast.error("Failed to set wallpaper");
+      toast.error(result.error || "Failed to set wallpaper");
+      console.log(result.error);
     }
   };
 

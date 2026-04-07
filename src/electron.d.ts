@@ -1,7 +1,7 @@
 export interface ElectronAPI {
   importWallpapers: () => Promise<{ success: boolean, wallpapers: Wallpaper[] }>
   getWallpapers: (offset?: number, limit?: number, favoritesOnly?: boolean) => Promise<{ total: number, wallpapers: Wallpaper[], recents: { most_recent: Wallpaper, used: Wallpaper[] } }>
-  setWallpaper: (wallpaper: Wallpaper) => Promise<{ success: boolean }>
+  setWallpaper: (wallpaper: Wallpaper) => Promise<{ success: boolean, error?: string }>
   getWallpaper: (id: string) => Promise<Wallpaper | null>
   renameWallpaper: (id: string, newName: string) => Promise<{ success: boolean, name?: string }>
 

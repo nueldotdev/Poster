@@ -7,10 +7,9 @@ import { v4 as uuid } from "uuid";
 import { pathToFileURL } from "url"; 
 import { store } from "./store";
 import { Wallpaper } from "./electron.d";
+import { setWallpaper } from "wallpaper";
 import { exec } from "child_process";
 import { promisify } from "util";
-// import sharp from "sharp";
-import { setWallpaper } from "wallpaper";
 
 const execAsync = promisify(exec);
 
@@ -53,6 +52,7 @@ const createWindow = () => {
     );
   }
 
+
   mainWindow.menuBarVisible = false;
   mainWindow.setIcon(path.join(__dirname, "../../src/assets/icon.png"));
   mainWindow.setTitle("Poster");
@@ -83,6 +83,7 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
+
 
 // --- IPC Handlers ---
 
@@ -398,25 +399,60 @@ ipcMain.handle("preview-wallpaper", async (_event, id) => {
 ipcMain.handle("set-wallpaper", async (_event, w) => {
   try {
     const libraryDir = path.join(app.getPath("userData"), "library");
-    const filePath = path.resolve(libraryDir, w.optimizedFile || w.file);
-    
-    // Cross-platform wallpaper setting
-    await setWallpaper(filePath);
-    
-    // Update recents
+
+    // ---------- resolve absolute path ----------
+    const relativePath = w.optimizedFile || w.file;
+
+    const filePath = path.isAbsolute(relativePath)
+      ? relativePath
+      : path.join(libraryDir, relativePath);
+
+    if (!fs.existsSync(filePath)) {
+      console.error("Wallpaper file not found:", filePath);
+      return { success: false, error: "File not found" };
+    }
+
+    // ---------- SET WALLPAPER ----------
+    try {
+      await setWallpaper(filePath);
+    } catch (err: any) {
+      console.warn("wallpaper package failed, trying system fallback:", err);
+      
+      if (process.platform === "win32") {
+        // Use a robust one-liner that avoids PowerShell here-string parser issues
+        const escapedPath = filePath.replace(/'/g, "''");
+        const psCommand = `Add-Type -TypeDefinition "using System.Runtime.InteropServices; public class Wallpaper { [DllImport(""user32.dll"", CharSet=CharSet.Auto)] public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni); }"; [Wallpaper]::SystemParametersInfo(20, 0, '${escapedPath}', 3)`;
+        await execAsync(`powershell -ExecutionPolicy Bypass -Command "${psCommand}"`);
+      } else if (process.platform === "darwin") {
+        // AppleScript fallback for macOS
+        const appleScript = `tell application "System Events" to tell every desktop to set picture to "${filePath}"`;
+        await execAsync(`osascript -e '${appleScript}'`);
+      } else {
+        throw err;
+      }
+    }
+
+    // ---------- STORE UPDATE ----------
+    const { url, ...wToStore } = w;
+
     const recents = store.get("recents") || { used: [] };
-    // Multi-MB base64 blob is always recomputed from disk on read
-    const { url: _, ...wToStore } = w;
-    const used = [wToStore, ...(recents.used || []).filter((u: any) => u.id !== w.id)].slice(0, 3);
-    
+
+    const used = [
+      wToStore,
+      ...(recents.used || []).filter((u: any) => u.id !== w.id)
+    ].slice(0, 3);
+
     store.set("recents", {
       most_recent: wToStore,
       used
     });
 
     return { success: true };
-  } catch (e) {
+  } catch (e: any) {
     console.error("Set wallpaper failed:", e);
-    return { success: false };
+    return {
+      success: false,
+      error: e?.message || "Unknown error"
+    };
   }
 });

@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Onboarding from "./pages/onboarding/Onboarding";
 import { Toaster } from "sonner";
 import FavoritesPage from "./pages/FavoritesPage";
+import SlideshowPage from "./pages/SlideshowPage";
 import WallpaperDetail from "./pages/WallpaperDetail";
 import SettingsPage from "./pages/SettingsPage";
 
@@ -30,17 +31,18 @@ const App = () => {
       />
       <Routes>
         <Route path={window.location.pathname} element={<Index />} />
-        <Route path="/" element={<Index />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/app" element={<MainLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="favorites" element={<FavoritesPage />} />
-          <Route path="about" element={<AboutPage />} />
-          <Route path="wallpaper/:id" element={<WallpaperDetail />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
-      </Routes>
-    </Router>
+        <Route path="/" element={<Index />} />   
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/app" element={<MainLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="favorites" element={<FavoritesPage />} />
+        <Route path="slideshow" element={<SlideshowPage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="wallpaper/:id" element={<WallpaperDetail />} />
+        <Route path="settings" element={<SettingsPage />} />
+      </Route>
+    </Routes>
+  </Router>
   );
 };
 

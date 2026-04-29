@@ -261,7 +261,7 @@
   border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  /* gap: 8px; */
   padding: 0 12px;
   height: 36px;
   margin-left: auto;

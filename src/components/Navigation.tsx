@@ -27,7 +27,7 @@ const Navigation = () => {
         </div>
         <div className='flex flex-col'>
           <h1 className='logo-text'>Poster</h1>
-          {isPro && <span className='pro-badge'><Zap size={10} fill="currentColor" /> PRO</span>}
+          {/* {isPro && <span className='pro-badge'><Zap size={10} fill="currentColor" /> PRO</span>} */}
         </div>
       </div>
       <ul className='nav'>

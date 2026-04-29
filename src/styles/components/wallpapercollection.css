@@ -176,7 +176,7 @@
 
 .wall-actions {
   display: flex;
-  row-gap: 1rem;
+  column-gap: 5px;
   justify-content: flex-end;
 }
 

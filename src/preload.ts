@@ -24,7 +24,17 @@ contextBridge.exposeInMainWorld("api", {
   cancelEnhancement: (id: string) => ipcRenderer.invoke("cancel-enhancement", id),
   getEnhancementCount: () => ipcRenderer.invoke("get-enhancement-count"),
   getWallpaperSize: (id: string) => ipcRenderer.invoke("get-wallpaper-size", id),
+  
+  // Slideshow
+  getSlideshowSettings: () => ipcRenderer.invoke("get-slideshow-settings"),
+  updateSlideshowSettings: (settings: any) => ipcRenderer.invoke("update-slideshow-settings", settings),
+  toggleSlideshow: () => ipcRenderer.invoke("toggle-slideshow"),
+  addToSlideshow: (id: string) => ipcRenderer.invoke("add-to-slideshow", id),
+  removeFromSlideshow: (id: string) => ipcRenderer.invoke("remove-from-slideshow", id),
+
   getWallpaperDimensions: (id: string) => ipcRenderer.invoke("get-wallpaper-dimensions", id),
   getWallpaperTags: (id: string) => ipcRenderer.invoke("get-wallpaper-tags", id),
   showMeStore: () => ipcRenderer.invoke("show-me-store"),
+
+  getSearchResults: (query: string) => ipcRenderer.invoke("search-wallpapers", query),
 });

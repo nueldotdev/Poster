@@ -39,7 +39,7 @@ export default function HomePage() {
 
   return (
     <div className="page-container slide-up fade-in">
-      <CurrentBlock wallpaper={mostRecent} loading={loading} />
+      {/* <CurrentBlock wallpaper={mostRecent} loading={loading} /> */}
       {(used.length > 0 || loading) && <RecentUse used={used} loading={loading} />}
       <div className="w-full">
         <Collection onSetWallpaper={handleSet} />

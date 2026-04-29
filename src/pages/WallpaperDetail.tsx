@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit3, Check, X, Sparkles } from "lucide-react";
-import { Wallpaper } from "../electron.d";
+import { ArrowLeft, Edit3, Check, X, Sparkles, Play } from "lucide-react";
+import { Wallpaper, SlideshowSettings } from "../electron.d";
 import { Button } from "../components/objects/Button";
 import { WallpaperPreview } from "../components/WallpaperPreview";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ export default function WallpaperDetail() {
   const [aiEnhancing, setAiEnhancing] = useState(false);
   const [enhancementCount, setEnhancementCount] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
+  const [isInSlideshow, setIsInSlideshow] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -31,6 +32,9 @@ export default function WallpaperDetail() {
       });
       window.api.getEnhancementCount().then((count: number) => {
         setEnhancementCount(count);
+      });
+      window.api.getSlideshowSettings().then((s: SlideshowSettings) => {
+        setIsInSlideshow(s.selectedIds.includes(id));
       });
     }
   }, [id]);
@@ -47,7 +51,30 @@ export default function WallpaperDetail() {
     setSetting(false);
   };
 
-  const handleAIEnhance = async () => {
+  const toggleSlideshow = async () => {
+    if (!id) return;
+    if (isInSlideshow) {
+      const res = await window.api.removeFromSlideshow(id);
+      if (res.success) {
+        setIsInSlideshow(false);
+        toast.success("Removed from slideshow");
+      }
+    } else {
+      // Check limit
+      const s = await window.api.getSlideshowSettings();
+      if (s.selectedIds.length >= 5) {
+        toast.error("You can only have up to 5 wallpapers in your slideshow.");
+        return;
+      }
+      const res = await window.api.addToSlideshow(id);
+      if (res.success) {
+        setIsInSlideshow(true);
+        toast.success("Added to slideshow");
+      }
+    }
+  };
+
+  /* const handleAIEnhance = async () => {
     if (!id) return;
     if (enhancementCount >= 5) {
       toast.error("Enhancement limit (5) reached.");
@@ -55,16 +82,22 @@ export default function WallpaperDetail() {
     }
     
     setAiEnhancing(true);
-    const result = await window.api.enhanceWallpaper(id);
-    if (result.success) {
-      toast.success("AI Enhancement complete! Previewing... ✨");
-      setEnhancementCount(result.count);
-      setShowPreview(true); // Open the preview window with the AI result
-    } else {
-      toast.error(result.error || "AI Enhancement failed");
+    try {
+      const result = await window.api.enhanceWallpaper(id);
+      if (result.success) {
+        toast.success("AI Analysis complete! ✨");
+        // We update the local count if returned, or just increment
+        setEnhancementCount(prev => result.count || prev + 1);
+        setShowPreview(true);
+      } else {
+        toast.error(result.error || "AI Enhancement failed");
+      }
+    } catch (err) {
+      toast.error("Connection to AI backend failed. Make sure it's running.");
+    } finally {
+      setAiEnhancing(false);
     }
-    setAiEnhancing(false);
-  };
+  }; */
 
   const handleRename = async () => {
     if (!wallpaper || !id) return;
@@ -121,10 +154,11 @@ export default function WallpaperDetail() {
 
   return (
     <div className="page-container wallpaper-detail-page slide-up fade-in">
-      {/* {showPreview && id && (
+      {showPreview && id && (
         <WallpaperPreview 
           id={id} 
-          onSave={async () => {
+          onSave={async (options) => {
+             await window.api.optimizeWallpaper(id, options);
              setShowPreview(false);
              const updated = await window.api.getWallpaper(id);
              setWallpaper(updated);
@@ -135,7 +169,7 @@ export default function WallpaperDetail() {
             await window.api.cancelEnhancement(id);
           }} 
         />
-      )} */}
+      )}
 
       <div className="detail-header" style={{ display: 'flex', width: '100%', marginBottom: '24px' }}>
         <button 
@@ -206,6 +240,14 @@ export default function WallpaperDetail() {
               disabled={setting}
             >
               {setting ? "Setting Wallpaper..." : "Set as Wallpaper"}
+            </Button>
+
+            <Button
+              className={`slideshow-toggle-btn ${isInSlideshow ? 'active' : ''}`}
+              onClick={toggleSlideshow}
+            >
+              <Play size={16} className={isInSlideshow ? 'filled' : ''} />
+              {isInSlideshow ? "In Slideshow" : "Add to Slideshow"}
             </Button>
 
             {/* <div className="detail-enhancement-box">

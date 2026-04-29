@@ -155,6 +155,24 @@
   justify-content: center;
 }
 
+.slideshow-toggle-btn {
+  margin-top: 16px;
+  width: 100%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.slideshow-toggle-btn.active {
+  background: var(--accent-muted);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.slideshow-toggle-btn svg.filled {
+  fill: var(--accent);
+}
+
 .btn-transparent {
   border: none;
   background: transparent;

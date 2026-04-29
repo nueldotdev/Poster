@@ -9,6 +9,12 @@ class OurStore {
     wallpapers: Wallpaper[];
     boards: { id: string, name: string, wallpaperIds: string[] }[];
     recents: { most_recent: Wallpaper; used: Wallpaper[] };
+    slideshow: {
+      enabled: boolean;
+      interval: number;
+      selectedIds: string[];
+      currentIndex: number;
+    };
   }>({
     defaults: {
       onboarded: false,
@@ -20,6 +26,12 @@ class OurStore {
       recents: {
         most_recent: { id: "", filename: "", file: "", addedAt: 0 },
         used: [],
+      },
+      slideshow: {
+        enabled: false,
+        interval: 60, // Default 1 hour
+        selectedIds: [],
+        currentIndex: 0,
       },
     },
   });

@@ -23,8 +23,16 @@ export interface ElectronAPI {
   enhanceWallpaper: (id: string) => Promise<{ success: boolean, error?: string, url?: string, count?: number }>;
   cancelEnhancement: (id: string) => Promise<{ success: boolean }>
 
+  // Slideshow
+  getSlideshowSettings: () => Promise<SlideshowSettings>
+  updateSlideshowSettings: (settings: Partial<SlideshowSettings>) => Promise<{ success: boolean }>
+  toggleSlideshow: () => Promise<{ success: boolean, enabled: boolean }>
+  addToSlideshow: (id: string) => Promise<{ success: boolean, count: number }>
+  removeFromSlideshow: (id: string) => Promise<{ success: boolean, count: number }>
+
 
   showMeStore: () => Promise<{ store: any }>
+  getSearchResults: (query: string) => Promise<Wallpaper[]>
 }
 
 export interface OptimizeOptions {
@@ -50,6 +58,13 @@ export interface Wallpaper {
   tags?: string[]
   addedAt: number
   isFavorite?: boolean
+}
+
+export interface SlideshowSettings {
+  enabled: boolean;
+  interval: number; // in minutes
+  selectedIds: string[]; // 3-5 wallpaper IDs
+  currentIndex: number;
 }
 
 declare global {
